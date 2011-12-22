@@ -153,6 +153,9 @@ ifeq ($(SYSTEM_UNAME), Linux)
   OS_VERSION := $(shell uname -r)
   # Arch and OS name/version
   mach := $(shell uname -m)
+  ifneq (,$(wildcard /usr/bin/dpkg-architecture))
+    mach := $(shell (dpkg-architecture -qDEB_BUILD_ARCH_CPU 2>/dev/null || echo $(mach)) | sed 's/powerpc$$/ppc/;s/hppa/parisc/')
+  endif
   archExpr = case "$(mach)" in \
                 i[3-9]86) \
                     echo i586 \
@@ -169,6 +172,9 @@ ifeq ($(SYSTEM_UNAME), Linux)
                 arm*) \
                     echo arm \
                     ;; \
+                sh*) \
+                    echo sh \
+		    ;; \
                 *) \
                     echo $(mach) \
                     ;; \
@@ -195,6 +201,9 @@ ifeq ($(SYSTEM_UNAME), Linux)
         ARCH_DATA_MODEL=32
       else
         ARCH_DATA_MODEL=64
+      endif
+      ifeq ($(ARCH), sh)
+        ARCH_DATA_MODEL=32
       endif
     endif
   endif
